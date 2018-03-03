@@ -208,14 +208,14 @@ uint8_t  arduinoUART::sendCommand( char* command,
   uint16_t i = 0;
 
   #if DEBUG_UART > 0
-    PRINT_UART(F("cmd:")); Serial.println(command);    
+    PRINT_UART(F("cmd:")); Serial2.println(command);
   #endif
 
   #if DEBUG_UART > 1      
-    PRINT_UART(F("ans1:")); Serial.println(ans1);  
-    if(ans2!=NULL) { PRINT_UART(F("ans2:")); Serial.println(ans2);}
-    if(ans3!=NULL) { PRINT_UART(F("ans3:")); Serial.println(ans3);}
-    if(ans4!=NULL) { PRINT_UART(F("ans4:")); Serial.println(ans4);}
+    PRINT_UART(F("ans1:")); Serial2.println(ans1);
+    if(ans2!=NULL) { PRINT_UART(F("ans2:")); Serial2.println(ans2);}
+    if(ans3!=NULL) { PRINT_UART(F("ans3:")); Serial2.println(ans3);}
+    if(ans4!=NULL) { PRINT_UART(F("ans4:")); Serial2.println(ans4);}
   #endif
             
   // clear uart buffer before sending command
@@ -226,8 +226,9 @@ uint8_t  arduinoUART::sendCommand( char* command,
 
   /// 1. print command
   printString( command, _uart ); 
+
   delay( _def_delay );
-   
+
   /// 2. read answer  
   // clear _buffer
   memset( _buffer, 0x00, sizeof(_buffer) );
@@ -235,11 +236,11 @@ uint8_t  arduinoUART::sendCommand( char* command,
 
   // get actual instant
   unsigned long previous = millis();
-  
+
   // check available data for 'timeout' milliseconds
   while( (millis() - previous) < timeout )
   {
-  
+
     if( serialAvailable(_uart) )
     {
       if ( i < (sizeof(_buffer)-1) )
@@ -254,7 +255,7 @@ uint8_t  arduinoUART::sendCommand( char* command,
     {   
       #if DEBUG_UART > 0
         PRINT_UART(F("found:"));  
-        Serial.println( ans1 );  
+        Serial2.println( ans1 );
       #endif    
       return 1;
     }
@@ -266,7 +267,7 @@ uint8_t  arduinoUART::sendCommand( char* command,
       { 
         #if DEBUG_UART > 0
           PRINT_UART(F("found:"));  
-          Serial.println( ans2 );  
+          Serial2.println( ans2 );
         #endif      
         return 2;
       }
@@ -279,7 +280,7 @@ uint8_t  arduinoUART::sendCommand( char* command,
       { 
         #if DEBUG_UART > 0
           PRINT_UART(F("found:"));    
-          Serial.println( ans3 );  
+          Serial2.println( ans3 );
         #endif        
         return 3;
       }
@@ -292,7 +293,7 @@ uint8_t  arduinoUART::sendCommand( char* command,
       { 
         #if DEBUG_UART > 0
           PRINT_UART(F("found:"));
-          Serial.println( ans4 );  
+          Serial2.println( ans4 );
         #endif      
         return 4;
       }
@@ -307,7 +308,7 @@ uint8_t  arduinoUART::sendCommand( char* command,
   #endif  
   #if DEBUG_UART > 1
     PRINT_UART(F("_buffer:"));
-    Serial.println( (char *)_buffer );
+    Serial2.println( (char *)_buffer );
   #endif  
   return 0; 
 }
@@ -912,12 +913,11 @@ void serialFlush(uint8_t portNum)
   else 
   {
     #if defined(HAVE_HWSERIAL1)
-    Serial1.flush();
-
-    while (Serial1.available()) {
+	unsigned long previous = millis();
+    while (Serial1.available() && ((millis() - previous) < 100)) {
         Serial1.read();
       }
-
+    Serial1.flush();
     #endif // HAVE_HWSERIAL1
   }
 }

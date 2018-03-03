@@ -102,10 +102,13 @@ sloeber.ino.cpp.o: ..\sloeber.ino.cpp \
  C:\Program\ Files\sloeber\arduinoPlugin\packages\adafruit\hardware\samd\1.0.22\cores\arduino/USB/USB_host.h \
  C:\Program\ Files\sloeber\arduinoPlugin\packages\adafruit\hardware\samd\1.0.22\cores\arduino/USB/samd21_host.h \
  ..\constant.h \
+ C:\Program\ Files\sloeber\arduinoPlugin\packages\adafruit\hardware\samd\1.0.22\cores\arduino/wiring_private.h \
  C:\Program\ Files\sloeber\arduinoPlugin\libraries\RTCZero\1.5.2\src/RTCZero.h \
  C:\Users\Emanuele\Documents\sloeber-workspace\Modem1\arduino-api/arduinoUART.h \
  C:\Users\Emanuele\Documents\sloeber-workspace\Modem1\arduinoLoRaWAN/arduinoLoRaWAN.h \
- ..\Modem2.ino
+ C:\Users\Emanuele\Documents\sloeber-workspace\Modem1\arduinoLoRaWAN/configLoRaWAN.h \
+ C:\Users\Emanuele\Documents\sloeber-workspace\Modem1\arduinoLoRaWAN/arduinoLoRaWAN.h \
+ ..\Modem1.ino
 
 C:\Program\ Files\sloeber\arduinoPlugin\packages\adafruit\hardware\samd\1.0.22\cores\arduino/Arduino.h:
 
@@ -313,10 +316,16 @@ C:\Program\ Files\sloeber\arduinoPlugin\packages\adafruit\hardware\samd\1.0.22\c
 
 ..\constant.h:
 
+C:\Program\ Files\sloeber\arduinoPlugin\packages\adafruit\hardware\samd\1.0.22\cores\arduino/wiring_private.h:
+
 C:\Program\ Files\sloeber\arduinoPlugin\libraries\RTCZero\1.5.2\src/RTCZero.h:
 
 C:\Users\Emanuele\Documents\sloeber-workspace\Modem1\arduino-api/arduinoUART.h:
 
 C:\Users\Emanuele\Documents\sloeber-workspace\Modem1\arduinoLoRaWAN/arduinoLoRaWAN.h:
 
-..\Modem2.ino:
+C:\Users\Emanuele\Documents\sloeber-workspace\Modem1\arduinoLoRaWAN/configLoRaWAN.h:
+
+C:\Users\Emanuele\Documents\sloeber-workspace\Modem1\arduinoLoRaWAN/arduinoLoRaWAN.h:
+
+..\Modem1.ino:

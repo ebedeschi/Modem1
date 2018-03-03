@@ -15,5 +15,4 @@
 #define BAT_ADC_EN 15
 #define BAT_ADC 19
 
-
 #endif /* CONSTANT_H_ */

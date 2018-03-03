@@ -268,6 +268,45 @@ const char* const table_LoRaWAN_ANSWERS[] PROGMEM =
 // System functions
 ////////////////////////////////////////////////////////////////////////////////
 
+void arduinoLoRaWAN::printAnswer(uint8_t ans)
+{
+	char cret[30];
+	cret[0]='\0';
+
+	switch(ans)
+	{
+		case LORAWAN_ANSWER_OK:
+			sprintf(cret,"LORAWAN_ANSWER_OK\r\n");
+		break;
+		case LORAWAN_ANSWER_ERROR:
+			sprintf(cret,"LORAWAN_ANSWER_ERROR\r\n");
+		break;
+		case LORAWAN_NO_ANSWER:
+			sprintf(cret,"LORAWAN_NO_ANSWER\r\n");
+		break;
+		case LORAWAN_INIT_ERROR:
+			sprintf(cret,"LORAWAN_INIT_ERROR\r\n");
+		break;
+		case LORAWAN_LENGTH_ERROR:
+			sprintf(cret,"LORAWAN_LENGTH_ERROR\r\n");
+		break;
+		case LORAWAN_SENDING_ERROR:
+			sprintf(cret,"LORAWAN_SENDING_ERROR\r\n");
+		break;
+		case LORAWAN_NOT_JOINED:
+			sprintf(cret,"LORAWAN_NOT_JOINED\r\n");
+		break;
+		case LORAWAN_INPUT_ERROR:
+			sprintf(cret,"LORAWAN_INPUT_ERROR\r\n");
+		break;
+		case LORAWAN_VERSION_ERROR:
+			sprintf(cret,"LORAWAN_VERSION_ERROR\r\n");
+		break;
+	}
+
+	Serial2.print(cret);
+}
+
 /*!
  * @brief   This function powers on the module
  * 
@@ -1767,50 +1806,50 @@ uint8_t arduinoLoRaWAN::sendConfirmed(uint8_t port, char* payload)
                 memset(_data,0x00,sizeof(_data));
                 strncpy(_data, pch, sizeof(_data)-1);
 
-                saveConfig();
+//                saveConfig();
                 _dataReceived = true;
                 return LORAWAN_ANSWER_OK;
             }
             else
             {
-                saveConfig();
+//                saveConfig();
                 return LORAWAN_ANSWER_OK;
             }
         }
         else if (status == 2)
         {
-            saveConfig();
+//            saveConfig();
             return LORAWAN_ANSWER_OK;
         }
         else if (status == 3)
         {
-            saveConfig();
+//            saveConfig();
             return LORAWAN_SENDING_ERROR;
         }
         else if (status == 4)
         {
-            saveConfig();
+//            saveConfig();
             return LORAWAN_LENGTH_ERROR;
         }
         else
         {
-            saveConfig();
+//            saveConfig();
             return LORAWAN_NO_ANSWER;
         }
     }
     else if (status == 2)
     {
-        saveConfig();
+//        saveConfig();
         return LORAWAN_ANSWER_ERROR;
     }
     else if (status == 3)
     {
-        saveConfig();
+//        saveConfig();
         return LORAWAN_NOT_JOINED;
     }
     else
     {
-        saveConfig();
+//        saveConfig();
         return LORAWAN_NO_ANSWER;
     }
 }
@@ -1918,44 +1957,44 @@ uint8_t arduinoLoRaWAN::sendUnconfirmed(uint8_t port, char* payload)
             }
             else
             {
-                saveConfig();
+//                saveConfig();
                 return LORAWAN_ANSWER_OK;
             }
         }
         else if (status == 2)
         {
-            saveConfig();
+//            saveConfig();
             return LORAWAN_ANSWER_OK;
         }
         else if (status == 3)
         {
-            saveConfig();
+//            saveConfig();
             return LORAWAN_SENDING_ERROR;
         }
         else if (status == 4)
         {
-            saveConfig();
+//            saveConfig();
             return LORAWAN_LENGTH_ERROR;
         }
         else
         {
-            saveConfig();
+//            saveConfig();
             return LORAWAN_NO_ANSWER;
         }
     }
     else if (status == 2)
     {
-        saveConfig();
+//        saveConfig();
         return LORAWAN_ANSWER_ERROR;
     }
     else if (status == 3)
     {
-        saveConfig();
+//        saveConfig();
         return LORAWAN_NOT_JOINED;
     }
     else
     {
-        saveConfig();
+//        saveConfig();
         return LORAWAN_NO_ANSWER;
     }
 }

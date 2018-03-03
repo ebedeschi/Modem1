@@ -134,6 +134,8 @@ class arduinoLoRaWAN : public arduinoUART
         	_version = 0;
         };
         
+        static void printAnswer(uint8_t ans);
+
         // System functions
         uint8_t ON(uint8_t uart);
         uint8_t OFF(uint8_t uart);

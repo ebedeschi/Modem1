@@ -1,11 +1,13 @@
 
-# include "constant.h"
+#include "constant.h"
 
+#include "wiring_private.h"
 #include <RTCZero.h>
 #include <arduinoUART.h>
 
 // LoRaWAN library
 #include <arduinoLoRaWAN.h>
+#include <configLoRaWAN.h>
 
 RTCZero rtc;
 
@@ -31,7 +33,7 @@ char APP_KEY[] = "27C6363C4B58C2FAA796DA60F762841B";
 ////////////////////////////////////////////////////////////
 
 // Define port to use in Back-End: from 1 to 223
-uint8_t port = 3;
+uint8_t port = 1;
 
 // Define data payload to send (maximum is up to data rate)
 char data[] = "010203";
@@ -39,48 +41,11 @@ char data[] = "010203";
 // variable
 uint8_t error;
 
-void printAnswer(uint8_t ans)
-{
-	char cret[30];
-	cret[0]='\0';
-
-	switch(ans)
-	{
-		case LORAWAN_ANSWER_OK:
-			sprintf(cret,"LORAWAN_ANSWER_OK\r\n");
-		break;
-		case LORAWAN_ANSWER_ERROR:
-			sprintf(cret,"LORAWAN_ANSWER_ERROR\r\n");
-		break;
-		case LORAWAN_NO_ANSWER:
-			sprintf(cret,"LORAWAN_NO_ANSWER\r\n");
-		break;
-		case LORAWAN_INIT_ERROR:
-			sprintf(cret,"LORAWAN_INIT_ERROR\r\n");
-		break;
-		case LORAWAN_LENGTH_ERROR:
-			sprintf(cret,"LORAWAN_LENGTH_ERROR\r\n");
-		break;
-		case LORAWAN_SENDING_ERROR:
-			sprintf(cret,"LORAWAN_SENDING_ERROR\r\n");
-		break;
-		case LORAWAN_NOT_JOINED:
-			sprintf(cret,"LORAWAN_NOT_JOINED\r\n");
-		break;
-		case LORAWAN_INPUT_ERROR:
-			sprintf(cret,"LORAWAN_INPUT_ERROR\r\n");
-		break;
-		case LORAWAN_VERSION_ERROR:
-			sprintf(cret,"LORAWAN_VERSION_ERROR\r\n");
-		break;
-	}
-
-	Serial.print(cret);
-}
+uint32_t cont = 0;
 
 void alarmMatch()
 {
-
+	Serial2.println("Wakeup");
 }
 
 // the setup function runs once when you press reset or power the board
@@ -109,12 +74,24 @@ void setup() {
 	digitalWrite(BAT_ADC_EN, LOW);
 	pinMode(BAT_ADC, INPUT);
 
-	Serial.begin(9600);
+	Serial2.begin(9600);
+	pinPeripheral(6, PIO_SERCOM);
+	pinPeripheral(7, PIO_SERCOM);
 //	Serial1.begin(57600);
 
 	digitalWrite(LED, HIGH);
 	delay(10000);
 	digitalWrite(LED, LOW);
+
+	// RTC initialization
+	rtc.begin();
+	rtc.setTime(hours, minutes, seconds);
+	rtc.setDate(day, month, year);
+
+	// RTC alarm setting on every 15 s resulting in 1 minute sleep period
+//	rtc.setAlarmSeconds(30);
+//	rtc.enableAlarm(rtc.MATCH_SS);
+//	rtc.attachInterrupt(alarmMatch);
 
     //------------------------------------
     //Module configuration
@@ -125,8 +102,8 @@ void setup() {
     //////////////////////////////////////////////
     error = LoRaWAN.ON(uart);
 
-    Serial.print("1. Switch on: ");
-    printAnswer(error);
+    Serial2.print("1. Switch on: ");
+    arduinoLoRaWAN::printAnswer(error);
 
 //    //////////////////////////////////////////////
 //    // 2. Set Device EUI
@@ -175,27 +152,22 @@ void setup() {
 //    //Device Addres in LoRaWAN._devAddr
 //    Serial.print("LoRaWAN._devAddr: ");
 //    Serial.println(LoRaWAN._devAddr);
-//
-//    error = LoRaWAN.setDataRate(5);
-//    printAnswer(error);
-//    Serial.print("LoRaWAN._dataRate: ");
-//    Serial.println(LoRaWAN._dataRate);
-//
-//    error = LoRaWAN.setRetries(0);
-//    printAnswer(error);
-//    Serial.print("LoRaWAN._dataRate: ");
-//    Serial.println(LoRaWAN._dataRate);
 
-    //////////////////////////////////////////////
-    // 6. Join network
-    //////////////////////////////////////////////
-//    error = LoRaWAN.joinOTAA();
+    error = LoRaWAN.setDataRate(5);
+    arduinoLoRaWAN::printAnswer(error);
+    Serial2.print("LoRaWAN._dataRate: ");
+    Serial2.println(LoRaWAN._dataRate);
+
+    error = LoRaWAN.setRetries(0);
+    arduinoLoRaWAN::printAnswer(error);
+    Serial2.print("LoRaWAN._dataRate: ");
+    Serial2.println(LoRaWAN._dataRate);
+
+//    error = configChDefault(LoRaWAN);
+//    arduinoLoRaWAN::printAnswer(error);
+
+//    error = LoRaWAN.sleep(60000);
 //    printAnswer(error);
-
-    error = LoRaWAN.sleep(60000);
-    printAnswer(error);
-
-//    Serial1.print("sys sleep 60000\r\n");
 
     //////////////////////////////////////////////
     // 7. Switch off
@@ -204,59 +176,152 @@ void setup() {
 //    Serial.print("Switch off: ");
 //    printAnswer(error);
 
-    Serial.println("Start sleep");
-	Serial.flush();
-    Serial.end();
-//    Serial1.end();
-
-//    pinMode(0, INPUT_PULLUP);
-//    pinMode(1, INPUT_PULLUP);
-
-
-    // RTC initialization
-    rtc.begin();
-    rtc.setTime(hours, minutes, seconds);
-    rtc.setDate(day, month, year);
-
-    // RTC alarm setting on every 15 s resulting in 1 minute sleep period
-    rtc.setAlarmSeconds(10);
-    rtc.enableAlarm(rtc.MATCH_SS);
-    rtc.attachInterrupt(alarmMatch);
-
-    digitalWrite(LED, LOW);
-    USBDevice.detach();
-    rtc.standbyMode();
-
-    // Initialize USB and attach to host (not required if not in use)
-    USBDevice.init();
-    USBDevice.attach();
-
-	digitalWrite(LED, HIGH);
-	delay(5000);
-	digitalWrite(LED, LOW);
-
-    error = LoRaWAN.wakeUP();
-    printAnswer(error);
-
+//    Serial.println("Start sleep");
+//	Serial.flush();
+//    Serial.end();
+////    Serial1.end();
+//
+////    pinMode(0, INPUT_PULLUP);
+////    pinMode(1, INPUT_PULLUP);
+//    // RTC initialization
+//    rtc.begin();
+//    rtc.setTime(hours, minutes, seconds);
+//    rtc.setDate(day, month, year);
+//
+//    // RTC alarm setting on every 15 s resulting in 1 minute sleep period
+//    rtc.setAlarmSeconds(10);
+//    rtc.enableAlarm(rtc.MATCH_SS);
+//    rtc.attachInterrupt(alarmMatch);
+//
+//    digitalWrite(LED, LOW);
+//    USBDevice.detach();
+//    rtc.standbyMode();
+//
+//    // Initialize USB and attach to host (not required if not in use)
+//    USBDevice.init();
+//    USBDevice.attach();
+//
+//	digitalWrite(LED, HIGH);
+//	delay(5000);
+//	digitalWrite(LED, LOW);
+//
+//    error = LoRaWAN.wakeUP();
+//    printAnswer(error);
+//
+//	delay(100);
+//
 //	error = LoRaWAN.check();
 //	printAnswer(error);
 
-//	Serial1.write((uint8_t)0x00);
-//	Serial1.write((uint8_t)0x55);
 
-	delay(100);
+//	digitalWrite(LED, HIGH);
+//	delay(5000);
+//	digitalWrite(LED, LOW);
 
-	error = LoRaWAN.check();
-	printAnswer(error);
+    //////////////////////////////////////////////
+    // 6. Join network
+    //////////////////////////////////////////////
+    error = LoRaWAN.joinOTAA();
+    arduinoLoRaWAN::printAnswer(error);
+
+    // Check status
+     if( error == 0 )
+     {
+       //2. Join network OK
+       Serial.println("Join network OK");
+
+
+     }
+     else
+     {
+       //2. Join network error
+    	 Serial.println("Join network error");
+     }
+
 
 }
 
 // the loop function runs over and over again forever
 void loop() {
-  digitalWrite(LED, HIGH);   // turn the LED on (HIGH is the voltage level)
-  delay(1000);              // wait for a second
-  digitalWrite(LED, LOW);    // turn the LED off by making the voltage LOW
-  delay(1000);              // wait for a second
+
+	//////////////////////////////////////////////
+	// 3. Send unconfirmed packet
+	//////////////////////////////////////////////
+
+	error = LoRaWAN.sendConfirmed(port, data);
+	arduinoLoRaWAN::printAnswer(error);
+
+	// Error messages:
+	/*
+	* '6' : Module hasn't joined a network
+	* '5' : Sending error
+	* '4' : Error with data length
+	* '2' : Module didn't response
+	* '1' : Module communication error
+	*/
+	// Check status
+	if( error == 0 )
+	{
+	 //3. Send Confirmed packet OK
+	 Serial.println("Send Confirmed packet OK");
+	 if (LoRaWAN._dataReceived == true)
+	 {
+	   //There's data on
+	   //port number: LoRaWAN._port
+	   //and Data in: LoRaWAN._data
+	   Serial.println("Downlink data");
+	   Serial.print("LoRaWAN._port: ");
+	   Serial.println(LoRaWAN._port);
+	   Serial.print("LoRaWAN._data: ");
+	   Serial.println(LoRaWAN._data);
+	 }
+	}
+	else
+	{
+	 //3. Send Confirmed packet error
+	   Serial.println("Send Confirmed packet ERROR");
+	}
+	digitalWrite(LED, HIGH);
+	delay(300);
+	digitalWrite(LED, LOW);
+
+	error = LoRaWAN.sleep(300000);
+	arduinoLoRaWAN::printAnswer(error);
+
+	Serial2.print("Start sleep: ");
+	Serial2.println(++cont);
+//	Serial2.flush();
+//	Serial2.end();
+
+	rtc.setAlarmSeconds((rtc.getAlarmSeconds() + 30) % 60);
+	rtc.enableAlarm(rtc.MATCH_SS);
+	rtc.attachInterrupt(alarmMatch);
+
+	digitalWrite(LED, LOW);
+//	USBDevice.detach();
+	rtc.standbyMode();
+
+	// Initialize USB and attach to host (not required if not in use)
+//	USBDevice.init();
+//	USBDevice.attach();
+	delay(500);
+//	Serial2.begin(9600);
+	Serial2.println("Exit sleep");
+//	digitalWrite(LED, HIGH);
+//	delay(3000);
+//	digitalWrite(LED, LOW);
+
+	error = LoRaWAN.wakeUP();
+	arduinoLoRaWAN::printAnswer(error);
+
+	error = LoRaWAN.check();
+	arduinoLoRaWAN::printAnswer(error);
+
+
+//  digitalWrite(LED, HIGH);   // turn the LED on (HIGH is the voltage level)
+//  delay(1000);              // wait for a second
+//  digitalWrite(LED, LOW);    // turn the LED off by making the voltage LOW
+//  delay(1000);              // wait for a second
 }
 
 
