@@ -6,3 +6,4 @@
 /objects.mk
 /sources.mk
 /subdir.mk
+/ds18b20/

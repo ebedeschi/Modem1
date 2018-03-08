@@ -14,5 +14,16 @@
 #define RN_RESET 9
 #define BAT_ADC_EN 15
 #define BAT_ADC 19
+#define DS18B20_PIN 11
+
+/*! @enum DeviceState
+ */
+enum DeviceState
+{
+    DEVICE_STATE_INIT = 0,
+    DEVICE_STATE_JOIN = 1,
+    DEVICE_STATE_SEND = 2,
+    DEVICE_STATE_SLEEP = 3
+};
 
 #endif /* CONSTANT_H_ */
