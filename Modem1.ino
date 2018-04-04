@@ -64,7 +64,7 @@ uint32_t cont = 0;
 
 void alarmMatch()
 {
-	Serial2.println("Wakeup");
+	//Serial2.println("Wakeup");
 }
 
 // the setup function runs once when you press reset or power the board
@@ -87,20 +87,24 @@ void setup() {
 	pinMode(LED, OUTPUT);
 	digitalWrite(LED, LOW);
 	pinMode(RN_RESET, INPUT);
-//	pinMode(RN_RESET, OUTPUT);
-//	digitalWrite(RN_RESET, HIGH);
+	pinMode(RN_RESET, OUTPUT);
+	digitalWrite(RN_RESET, HIGH);
 	pinMode(BAT_ADC_EN, OUTPUT);
 	digitalWrite(BAT_ADC_EN, LOW);
 	pinMode(BAT_ADC, INPUT);
 
-	Serial2.begin(9600);
-	pinPeripheral(6, PIO_SERCOM);
-	pinPeripheral(7, PIO_SERCOM);
+	//Serial.begin(9600);
+	Serial.begin(9600);
+//	pinPeripheral(6, PIO_SERCOM);
+//	pinPeripheral(7, PIO_SERCOM);
 //	Serial1.begin(57600);
 
 	digitalWrite(LED, HIGH);
 	delay(10000);
 	digitalWrite(LED, LOW);
+	Serial.println("START");
+
+//	USBDevice.detach();
 
 	// RTC initialization
 	rtc.begin();
@@ -162,11 +166,15 @@ void setup() {
 //	digitalWrite(LED, LOW);
 
 	htuP = htu.begin();
-	Serial2.print("Sensor HTU21DF: ");
+	Serial.print("Sensor HTU21DF: ");
 	if (htuP)
-		Serial2.println("ON");
+	{
+		Serial.println("ON");
+	}
 	else
-		Serial2.println("OFF");
+	{
+		Serial.println("OFF");
+	}
 
 	bme280.settings.commInterface = I2C_MODE;
 	bme280.settings.I2CAddress = 0x77;
@@ -190,6 +198,9 @@ void setup() {
 		opt3001.writeConfig(newConfig);
 	}
 
+	 error = LoRaWAN.ON(uart);
+	 arduinoLoRaWAN::printAnswer(error);
+
 }
 
 // the loop function runs over and over again forever
@@ -205,7 +216,7 @@ void loop() {
 		    //////////////////////////////////////////////
 		    error = LoRaWAN.ON(uart);
 
-		    Serial2.print("1. Switch on: ");
+		    //Serial2.print("1. Switch on: ");
 		    arduinoLoRaWAN::printAnswer(error);
 
 		//    //////////////////////////////////////////////
@@ -258,13 +269,16 @@ void loop() {
 
 		    error = LoRaWAN.setDataRate(5);
 		    arduinoLoRaWAN::printAnswer(error);
-		    Serial2.print("LoRaWAN._dataRate: ");
-		    Serial2.println(LoRaWAN._dataRate);
+		    //Serial2.print("LoRaWAN._dataRate: ");
+		    //Serial2.println(LoRaWAN._dataRate);
 
 		    error = LoRaWAN.setRetries(0);
 		    arduinoLoRaWAN::printAnswer(error);
-		    Serial2.print("LoRaWAN._dataRate: ");
-		    Serial2.println(LoRaWAN._dataRate);
+		    //Serial2.print("LoRaWAN._dataRate: ");
+		    //Serial2.println(LoRaWAN._dataRate);
+
+		    error = LoRaWAN.setADR("on");
+		    arduinoLoRaWAN::printAnswer(error);
 
 		//    error = configChDefault(LoRaWAN);
 		//    arduinoLoRaWAN::printAnswer(error);
@@ -313,53 +327,55 @@ void loop() {
 			if (htuP)
 			{
 				float t1 = htu.readTemperature();
-				Serial2.print("htu temp: "); Serial2.println(t1);
+				Serial.print("htu temp: ");
+				Serial.println(t1);
 				float h1 = htu.readHumidity();
-				Serial2.print("htu hum: "); Serial2.println(h1);
+				Serial.print("htu hum: ");
+				Serial.println(h1);
 				memcpy(&datab[0], &t1, 4);
 				sprintf(datas,"%02X%02X%02X%02X", datab[0] & 0xff, datab[1] & 0xff, datab[2] & 0xff, datab[3] & 0xff);
 				strcat(data, datas);
 				memcpy(&datab[0], &h1, 4);
 				sprintf(datas,"%02X%02X%02X%02X", datab[0] & 0xff, datab[1] & 0xff, datab[2] & 0xff, datab[3] & 0xff);
 				strcat(data, datas);
-		//		Serial2.print("hex: ");
-		//		Serial2.println(data);
+		//		//Serial2.print("hex: ");
+		//		//Serial2.println(data);
 			}
 			if(ds18b20Temp(_ds) == 0)
 			{
-				Serial2.print("DS18B20 temp: ");
-				Serial2.println(_ds18b20Temp);
+				Serial.print("DS18B20 temp: ");
+				Serial.println(_ds18b20Temp);
 				memcpy(&datab[0], &_ds18b20Temp, 4);
 				sprintf(datas,"%02X%02X%02X%02X", datab[0] & 0xff, datab[1] & 0xff, datab[2] & 0xff, datab[3] & 0xff);
 				strcat(data, datas);
-		//		Serial2.print("hex: ");
-		//		Serial2.println(data);
+		//		//Serial2.print("hex: ");
+		//		//Serial2.println(data);
 			}
 			if(opt3001P)
 			{
 				OPT3001 result = opt3001.readResult();
 				if(result.error == NO_ERROR)
 				{
-					Serial2.print("OPT3001: ");
-					Serial2.println(result.lux);
+					Serial.print("OPT3001: ");
+					Serial.println(result.lux);
 					memcpy(&datab[0], &result.lux, 4);
 					sprintf(datas,"%02X%02X%02X%02X", datab[0] & 0xff, datab[1] & 0xff, datab[2] & 0xff, datab[3] & 0xff);
 					strcat(data, datas);
-		//			Serial2.print("hex: ");
-		//			Serial2.println(data);
+		//			//Serial2.print("hex: ");
+		//			//Serial2.println(data);
 				}
 			}
 			if (bme280P)
 			{
-				Serial2.print("bme280 temp: ");
+				Serial.print("bme280 temp: ");
 				float t2 = bme280.readTempC();
-				Serial2.println(t2, 2);
-				Serial2.print("bme280 hum: ");
+				Serial.println(t2, 2);
+				Serial.print("bme280 hum: ");
 				float h2 = bme280.readFloatHumidity();
-				Serial2.println(h2, 2);
-				Serial2.print("bme280 press: ");
+				Serial.println(h2, 2);
+				Serial.print("bme280 press: ");
 				float p = bme280.readFloatPressure();
-				Serial2.println(bme280.readFloatPressure(), 2);
+				Serial.println(bme280.readFloatPressure(), 2);
 				memcpy(&datab[0], &t2, 4);
 				sprintf(datas,"%02X%02X%02X%02X", datab[0] & 0xff, datab[1] & 0xff, datab[2] & 0xff, datab[3] & 0xff);
 				strcat(data, datas);
@@ -369,8 +385,8 @@ void loop() {
 				memcpy(&datab[0], &p, 4);
 				sprintf(datas,"%02X%02X%02X%02X", datab[0] & 0xff, datab[1] & 0xff, datab[2] & 0xff, datab[3] & 0xff);
 				strcat(data, datas);
-		//		Serial2.print("hex: ");
-		//		Serial2.println(data);
+		//		//Serial2.print("hex: ");
+		//		//Serial2.println(data);
 			}
 
 			//////////////////////////////////////////////
@@ -421,28 +437,30 @@ void loop() {
 			delay(300);
 			digitalWrite(LED, LOW);
 
-			error = LoRaWAN.sleep(300000);
+			error = LoRaWAN.sleep(500000);
 			arduinoLoRaWAN::printAnswer(error);
 
-			Serial2.print("Start sleep: ");
-			Serial2.println(++cont);
-		//	Serial2.flush();
-		//	Serial2.end();
+			Serial.print("Start sleep: ");
+			Serial.println(++cont);
+//			//Serial2.flush();
+//			//Serial2.end();
 
-			rtc.setAlarmSeconds((rtc.getAlarmSeconds() + 30) % 60);
-			rtc.enableAlarm(rtc.MATCH_SS);
+			//rtc.setAlarmSeconds((rtc.getAlarmSeconds() + 30) % 60);
+			rtc.setAlarmMinutes((rtc.getAlarmMinutes() + 2) % 60);
+			rtc.enableAlarm(rtc.MATCH_MMSS);
 			rtc.attachInterrupt(alarmMatch);
 
 			digitalWrite(LED, LOW);
 		//	USBDevice.detach();
-			rtc.standbyMode();
+//			rtc.standbyMode();
+			delay(120000);
 
 			// Initialize USB and attach to host (not required if not in use)
 		//	USBDevice.init();
 		//	USBDevice.attach();
 			delay(500);
-		//	Serial2.begin(9600);
-			Serial2.println("Exit sleep");
+//			//Serial2.begin(9600);
+			Serial.println("Exit sleep");
 		//	digitalWrite(LED, HIGH);
 		//	delay(3000);
 		//	digitalWrite(LED, LOW);
@@ -462,53 +480,53 @@ void loop() {
 //	if (htuP)
 //	{
 //		float t1 = htu.readTemperature();
-//		Serial2.print("htu temp: "); Serial2.println(t1);
+//		Serial.print("htu temp: "); Serial.println(t1);
 //		float h1 = htu.readHumidity();
-//		Serial2.print("htu hum: "); Serial2.println(h1);
+//		Serial.print("htu hum: "); Serial.println(h1);
 //		memcpy(&datab[0], &t1, 4);
 //		sprintf(datas,"%X%X%X%X", datab[0], datab[1], datab[2], datab[3]);
 //		strcat(data, datas);
 //		memcpy(&datab[0], &h1, 4);
 //		sprintf(datas,"%X%X%X%X", datab[0], datab[1], datab[2], datab[3]);
 //		strcat(data, datas);
-////		Serial2.print("hex: ");
-////		Serial2.println(data);
+////		Serial.print("hex: ");
+////		Serial.println(data);
 //	}
 //	if(ds18b20Temp(_ds) == 0)
 //	{
-//		Serial2.print("DS18B20 temp: ");
-//		Serial2.println(_ds18b20Temp);
+//		Serial.print("DS18B20 temp: ");
+//		Serial.println(_ds18b20Temp);
 //		memcpy(&datab[0], &_ds18b20Temp, 4);
 //		sprintf(datas,"%X%X%X%X", datab[0], datab[1], datab[2], datab[3]);
 //		strcat(data, datas);
-////		Serial2.print("hex: ");
-////		Serial2.println(data);
+////		//Serial.print("hex: ");
+////		//Serial.println(data);
 //	}
 //	if(opt3001P)
 //	{
 //		OPT3001 result = opt3001.readResult();
 //		if(result.error == NO_ERROR)
 //		{
-//			Serial2.print("OPT3001: ");
-//			Serial2.println(result.lux);
+//			Serial.print("OPT3001: ");
+//			Serial.println(result.lux);
 //			memcpy(&datab[0], &result.lux, 4);
 //			sprintf(datas,"%X%X%X%X", datab[0], datab[1], datab[2], datab[3]);
 //			strcat(data, datas);
-////			Serial2.print("hex: ");
-////			Serial2.println(data);
+////			//Serial.print("hex: ");
+////			//Serial.println(data);
 //		}
 //	}
 //	if (bme280P)
 //	{
-//		Serial2.print("bme280 temp: ");
+//		Serial.print("bme280 temp: ");
 //		float t2 = bme280.readTempC();
-//		Serial2.println(t2, 2);
-//		Serial2.print("bme280 hum: ");
+//		Serial.println(t2, 2);
+//		Serial.print("bme280 hum: ");
 //		float h2 = bme280.readFloatHumidity();
-//		Serial2.println(h2, 2);
-//		Serial2.print("bme280 press: ");
+//		Serial.println(h2, 2);
+//		Serial.print("bme280 press: ");
 //		float p = bme280.readFloatPressure();
-//		Serial2.println(bme280.readFloatPressure(), 2);
+//		Serial.println(bme280.readFloatPressure(), 2);
 //		memcpy(&datab[0], &t2, 4);
 //		sprintf(datas,"%X%X%X%X", datab[0], datab[1], datab[2], datab[3]);
 //		strcat(data, datas);
@@ -518,14 +536,17 @@ void loop() {
 //		memcpy(&datab[0], &p, 4);
 //		sprintf(datas,"%X%X%X%X", datab[0], datab[1], datab[2], datab[3]);
 //		strcat(data, datas);
-////		Serial2.print("hex: ");
-////		Serial2.println(data);
+////		//Serial2.print("hex: ");
+////		//Serial2.println(data);
 //	}
 
-  digitalWrite(LED, HIGH);   // turn the LED on (HIGH is the voltage level)
-  delay(1000);              // wait for a second
-  digitalWrite(LED, LOW);    // turn the LED off by making the voltage LOW
-  delay(1000);              // wait for a second
+//	error = LoRaWAN.check();
+//	arduinoLoRaWAN::printAnswer(error);
+//
+//  digitalWrite(LED, HIGH);   // turn the LED on (HIGH is the voltage level)
+//  delay(1000);              // wait for a second
+//  digitalWrite(LED, LOW);    // turn the LED off by making the voltage LOW
+//  delay(5000);              // wait for a second
 }
 
 
@@ -551,7 +572,7 @@ uint8_t ds18b20Temp(OneWire ds)
 //	  }
 
 	  if (OneWire::crc8(addr, 7) != addr[7]) {
-	      Serial2.println("OneWire CRC is not valid!");
+	      //Serial2.println("OneWire CRC is not valid!");
 	      return 2;
 	  }
 //	  Serial.println();
@@ -571,7 +592,7 @@ uint8_t ds18b20Temp(OneWire ds)
 	      type_s = 0;
 	      break;
 	    default:
-	      Serial2.println("Device is not a DS18x20 family device.");
+	      //Serial2.println("Device is not a DS18x20 family device.");
 	      return 3;
 	  }
 

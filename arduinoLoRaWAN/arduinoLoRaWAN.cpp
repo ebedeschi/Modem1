@@ -304,7 +304,8 @@ void arduinoLoRaWAN::printAnswer(uint8_t ans)
 		break;
 	}
 
-	Serial2.print(cret);
+	Serial.print("--->");
+	Serial.print(cret);
 }
 
 /*!
@@ -327,8 +328,9 @@ uint8_t arduinoLoRaWAN::ON(uint8_t uart)
 
     // Open UART
     beginUART();
-    
+
     delay(300);
+
     error = check();
     error = check();
     return error;
