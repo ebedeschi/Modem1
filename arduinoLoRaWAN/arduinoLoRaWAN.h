@@ -106,6 +106,7 @@ class arduinoLoRaWAN : public arduinoUART
         char _radioMode[5];
         bool _crcStatus;
         uint8_t _powerIndex;
+        uint8_t _batteryLevel;
         uint8_t _dataRate;
         int8_t _radioPower;
         char _radioSF[5];
@@ -162,6 +163,7 @@ class arduinoLoRaWAN : public arduinoUART
         uint8_t setAppKey(char* key);
         uint8_t setAppSessionKey(char* key);
         uint8_t setPower(uint8_t index);
+        uint8_t setBatteryLevel(uint8_t level);
         uint8_t getPower();
         uint8_t setDataRate(uint8_t datarate);
         uint8_t getDataRate();

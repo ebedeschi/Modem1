@@ -23,6 +23,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modem1/arduino-api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modem1/core/core}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modem1/core/variant}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modem1/Adafruit_ASFcore}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modem1/libraries/Wire}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modem1/libraries/RTCZero}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modem1/libraries/RTCZero/src}&quot;"/>
@@ -33,6 +34,9 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modem1/libraries/ClosedCube_OPT3001}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modem1/libraries/ClosedCube_OPT3001/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modem1/libraries/OneWire}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modem1/libraries/DallasTemperature}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modem1/libraries/Adafruit_SleepyDog_Library}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modem1/libraries/Adafruit_SleepyDog_Library/utility}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.cpp.sketch.input.1579989469" name="CPP source files" superClass="io.sloeber.compiler.cpp.sketch.input"/>
 							</tool>
@@ -42,6 +46,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modem1/arduino-api}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modem1/core/core}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modem1/core/variant}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modem1/Adafruit_ASFcore}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modem1/libraries/Wire}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modem1/libraries/RTCZero}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modem1/libraries/RTCZero/src}&quot;"/>
@@ -52,6 +57,9 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modem1/libraries/ClosedCube_OPT3001}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modem1/libraries/ClosedCube_OPT3001/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modem1/libraries/OneWire}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modem1/libraries/DallasTemperature}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modem1/libraries/Adafruit_SleepyDog_Library}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modem1/libraries/Adafruit_SleepyDog_Library/utility}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.c.sketch.input.872271095" name="C Source Files" superClass="io.sloeber.compiler.c.sketch.input"/>
 							</tool>
@@ -71,6 +79,9 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modem1/libraries/ClosedCube_OPT3001}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modem1/libraries/ClosedCube_OPT3001/src}&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modem1/libraries/OneWire}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modem1/libraries/DallasTemperature}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modem1/libraries/Adafruit_SleepyDog_Library}&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:/Modem1/libraries/Adafruit_SleepyDog_Library/utility}&quot;"/>
 								</option>
 								<inputType id="io.sloeber.compiler.S.sketch.input.2078878338" name="Assembly source files" superClass="io.sloeber.compiler.S.sketch.input"/>
 							</tool>

@@ -115,6 +115,7 @@
  const char command_79[]    PROGMEM =   "mac set rxdelay1 %u\r\n";
  const char command_80[]    PROGMEM =   "mac reset\r\n";
  const char command_81[]    PROGMEM =   "sys sleep %lu\r\n";
+ const char command_82[]    PROGMEM =   "mac set bat %u\r\n";
 
 
 const char* const table_LoRaWAN_COMMANDS[] PROGMEM=       
@@ -201,6 +202,7 @@ const char* const table_LoRaWAN_COMMANDS[] PROGMEM=
     command_79,
     command_80,
     command_81,
+    command_82
 };
 
 
@@ -304,8 +306,8 @@ void arduinoLoRaWAN::printAnswer(uint8_t ans)
 		break;
 	}
 
-	Serial.print("--->");
-	Serial.print(cret);
+//	Serial.print("--->");
+//	Serial.print(cret);
 }
 
 /*!
@@ -1380,6 +1382,53 @@ uint8_t arduinoLoRaWAN::setPower(uint8_t index)
     }
 }
 
+/*!
+ * @brief   This command sets the battery level required
+ * 			for Device Status Answer frame in use with
+ * 			the LoRaWAN Class A protocol.
+ *
+ * @param   decimal number representing the level of the
+ * 			battery, from 0 to 255. 0 means external power,
+ * 			1 means low level, 254 means high level, 255 means
+ * 			the end device was not able to measure the battery level.
+ *
+ * @return
+ *  @arg    '0' if OK
+ *  @arg    '1' if error
+ *  @arg    '2' if no answer
+ *  @arg    '7' if input parameter error
+ *  @arg    '8' if unrecognized module
+ */
+uint8_t arduinoLoRaWAN::setBatteryLevel(uint8_t level)
+{
+    uint8_t status;
+    char ans1[15];
+    char ans2[15];
+
+    memset(_command,0x00,sizeof(_command));
+    memset(ans1,0x00,sizeof(ans1));
+    memset(ans2,0x00,sizeof(ans2));
+
+    // create "mac set bat" command
+    sprintf(_command,(char*)pgm_read_word(&(table_LoRaWAN_COMMANDS[82])), level);
+    // create "ok" answer
+    sprintf(ans1,(char*)pgm_read_word(&(table_LoRaWAN_ANSWERS[0])));
+    // create "invalid_param" answer
+    sprintf(ans2,(char*)pgm_read_word(&(table_LoRaWAN_ANSWERS[1])));
+
+    //send command and wait for ans
+    status = sendCommand(_command,ans1,ans2,200);
+
+    if (status == 1)
+    {
+    	_batteryLevel = level;
+        return LORAWAN_ANSWER_OK;
+    }
+    else
+    {
+        return LORAWAN_NO_ANSWER;
+    }
+}
 
 /*! 
  * @brief   This function is used to read the power index from module

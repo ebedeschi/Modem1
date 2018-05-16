@@ -2,12 +2,13 @@
 //This is a automatic generated file
 //Please do not modify this file
 //If you touch this file your change will be overwritten during the next build
-//This file has been generated on 2018-04-03 13:25:24
+//This file has been generated on 2018-05-16 10:37:56
 
 #include "Arduino.h"
 #include "constant.h"
 #include "wiring_private.h"
 #include <RTCZero.h>
+#include <Adafruit_SleepyDog.h>
 #include <arduinoUART.h>
 #include <Wire.h>
 #include "Adafruit_HTU21DF.h"
@@ -15,13 +16,14 @@
 #include <ClosedCube_OPT3001.h>
 #define OPT3001_ADDRESS 0x44
 #include <OneWire.h>
+#include <DallasTemperature.h>
 #include <arduinoLoRaWAN.h>
 #include <configLoRaWAN.h>
 
 void alarmMatch() ;
 void setup() ;
 void loop() ;
-uint8_t ds18b20Temp(OneWire ds) ;
+void printAddress(DeviceAddress deviceAddress) ;
 
 #include "Modem1.ino"
 

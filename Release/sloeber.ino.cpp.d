@@ -104,12 +104,15 @@ sloeber.ino.cpp.o: ..\sloeber.ino.cpp \
  ..\constant.h \
  C:\Program\ Files\sloeber\arduinoPlugin\packages\adafruit\hardware\samd\1.0.22\cores\arduino/wiring_private.h \
  C:\Program\ Files\sloeber\arduinoPlugin\libraries\RTCZero\1.5.2\src/RTCZero.h \
+ C:\Program\ Files\sloeber\arduinoPlugin\libraries\Adafruit_SleepyDog_Library\1.1.1/Adafruit_SleepyDog.h \
+ C:\Program\ Files\sloeber\arduinoPlugin\libraries\Adafruit_SleepyDog_Library\1.1.1/utility/WatchdogSAMD.h \
  C:\Users\Emanuele\Documents\sloeber-workspace\Modem1\arduino-api/arduinoUART.h \
  C:\Program\ Files\sloeber\arduinoPlugin\packages\adafruit\hardware\samd\1.0.22\libraries\Wire/Wire.h \
  C:\Program\ Files\sloeber\arduinoPlugin\libraries\Adafruit_HTU21DF_Library\1.0.1/Adafruit_HTU21DF.h \
  C:\Program\ Files\sloeber\arduinoPlugin\libraries\SparkFun_BME280\1.2.0\src/SparkFunBME280.h \
  C:\Program\ Files\sloeber\arduinoPlugin\libraries\ClosedCube_OPT3001\1.1.2\src/ClosedCube_OPT3001.h \
  C:\Program\ Files\sloeber\arduinoPlugin\libraries\OneWire\2.3.3/OneWire.h \
+ C:\Program\ Files\sloeber\arduinoPlugin\libraries\DallasTemperature\3.7.9/DallasTemperature.h \
  C:\Users\Emanuele\Documents\sloeber-workspace\Modem1\arduinoLoRaWAN/arduinoLoRaWAN.h \
  C:\Users\Emanuele\Documents\sloeber-workspace\Modem1\arduinoLoRaWAN/configLoRaWAN.h \
  C:\Users\Emanuele\Documents\sloeber-workspace\Modem1\arduinoLoRaWAN/arduinoLoRaWAN.h \
@@ -325,6 +328,10 @@ C:\Program\ Files\sloeber\arduinoPlugin\packages\adafruit\hardware\samd\1.0.22\c
 
 C:\Program\ Files\sloeber\arduinoPlugin\libraries\RTCZero\1.5.2\src/RTCZero.h:
 
+C:\Program\ Files\sloeber\arduinoPlugin\libraries\Adafruit_SleepyDog_Library\1.1.1/Adafruit_SleepyDog.h:
+
+C:\Program\ Files\sloeber\arduinoPlugin\libraries\Adafruit_SleepyDog_Library\1.1.1/utility/WatchdogSAMD.h:
+
 C:\Users\Emanuele\Documents\sloeber-workspace\Modem1\arduino-api/arduinoUART.h:
 
 C:\Program\ Files\sloeber\arduinoPlugin\packages\adafruit\hardware\samd\1.0.22\libraries\Wire/Wire.h:
@@ -336,6 +343,8 @@ C:\Program\ Files\sloeber\arduinoPlugin\libraries\SparkFun_BME280\1.2.0\src/Spar
 C:\Program\ Files\sloeber\arduinoPlugin\libraries\ClosedCube_OPT3001\1.1.2\src/ClosedCube_OPT3001.h:
 
 C:\Program\ Files\sloeber\arduinoPlugin\libraries\OneWire\2.3.3/OneWire.h:
+
+C:\Program\ Files\sloeber\arduinoPlugin\libraries\DallasTemperature\3.7.9/DallasTemperature.h:
 
 C:\Users\Emanuele\Documents\sloeber-workspace\Modem1\arduinoLoRaWAN/arduinoLoRaWAN.h:
 
