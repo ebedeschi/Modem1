@@ -19,6 +19,8 @@
 #include <configLoRaWAN.h>
 
 RTCZero rtc;
+#define SLEEP_TIME 10
+#define DUTY_CYCLE_TIME 180
 
 /* Change these values to set the current initial time */
 const uint8_t seconds = 0;
@@ -66,10 +68,14 @@ BME280 bme280;
 bool bme280P = false;
 ClosedCube_OPT3001 opt3001;
 bool opt3001P = false;
-
+uint8_t pre_tx_ok = 0;
 uint32_t cont = 0;
 
-int errtx = 0;
+uint32_t sleep_cont = 0;
+
+uint32_t appWatchdog = 0;
+
+int err_tx = 0;
 
 void alarmMatch()
 {
@@ -105,8 +111,8 @@ void setup() {
 	pinMode(BAT_ADC, INPUT);
 	analogReadResolution(12);
 
-	//Serial.begin(9600);
 	Serial.begin(9600);
+	Serial5.begin(9600);
 //	pinPeripheral(6, PIO_SERCOM);
 //	pinPeripheral(7, PIO_SERCOM);
 //	Serial1.begin(57600);
@@ -114,7 +120,7 @@ void setup() {
 	digitalWrite(LED, HIGH);
 	delay(10000);
 	digitalWrite(LED, LOW);
-	Serial.println("START");
+	Serial5.println("START");
 
 
 	// RTC initialization
@@ -123,14 +129,14 @@ void setup() {
 	rtc.setDate(day, month, year);
 
 	htuP = htu.begin();
-	Serial.print("Sensor HTU21DF: ");
+	Serial5.print("Sensor HTU21DF: ");
 	if (htuP)
 	{
-		Serial.println("htu ON");
+		Serial5.println("htu ON");
 	}
 	else
 	{
-		Serial.println("htu OFF");
+		Serial5.println("htu OFF");
 	}
 
 	sensors.begin();
@@ -139,18 +145,18 @@ void setup() {
 	_ds.check = false;
 	if (oneWire.search(_ds.addr))
 	{
-		Serial.print("ds18b20 ON: ");
+		Serial5.print("ds18b20 ON: ");
 		printAddress(_ds.addr);
-		Serial.println("");
+		Serial5.println("");
 		_ds.check = true;
 		sensors.setResolution(_ds.addr, 12);
 	}
 	else
-		Serial.println("ds18b20 OFF");
+		Serial5.println("ds18b20 OFF");
 
 	if(opt3001.begin(OPT3001_ADDRESS) == NO_ERROR)
 	{
-		Serial.println("opt3001P ON");
+		Serial5.println("opt3001P ON");
 		opt3001P = true;
 		OPT3001_Config newConfig;
 		newConfig.RangeNumber = B1100;
@@ -160,7 +166,7 @@ void setup() {
 		opt3001.writeConfig(newConfig);
 	}
 	else
-		Serial.println("opt3001P OFF");
+		Serial5.println("opt3001P OFF");
 
 	bme280.settings.commInterface = I2C_MODE;
 	bme280.settings.I2CAddress = 0x77;
@@ -172,11 +178,13 @@ void setup() {
 	bme280.settings.humidOverSample = 1;
 	if(bme280.begin() == 0x60)
 	{
-		Serial.println("bme280 ON");
+		Serial5.println("bme280 ON");
 		bme280P = true;
 	}
 	else
-		Serial.println("bme280 OFF");
+		Serial5.println("bme280 OFF");
+
+	Serial5.println("Fine setup");
 
 	Serial.end();
 	USBDevice.detach();
@@ -196,80 +204,34 @@ void loop() {
 		{
 			Watchdog.disable();
 			Watchdog.enable(16000);
-		    //////////////////////////////////////////////
-		    // 1. Switch on
-		    //////////////////////////////////////////////
-		    error = LoRaWAN.ON(uart);
-		    arduinoLoRaWAN::printAnswer(error);
+			//////////////////////////////////////////////
+			// 1. Switch on
+			//////////////////////////////////////////////
 
-		//    //////////////////////////////////////////////
-		//    // 2. Set Device EUI
-		//    //////////////////////////////////////////////
-		//    error = LoRaWAN.setDeviceEUI(DEVICE_EUI);
-		//
-		//    Serial.print("2. Set Device EUI: ");
-		//    Serial.println(error);
-		//
-		//    //////////////////////////////////////////////
-		//    // 3. Set Application EUI
-		//    //////////////////////////////////////////////
-		//    error = LoRaWAN.setAppEUI(APP_EUI);
-		//
-		//    Serial.print("3. Set Application EUI: ");
-		//    Serial.println(error);
-		//
-		//    //////////////////////////////////////////////
-		//    // 4. Set Application Session Key
-		//    //////////////////////////////////////////////
-		//    error = LoRaWAN.setAppKey(APP_KEY);
-		//
-		//    Serial.print("4. Set Application Session Key: ");
-		//    Serial.println(error);
-		//
-		//    //////////////////////////////////////////////
-		//    // 5. Save configuration
-		//    //////////////////////////////////////////////
-		//    error = LoRaWAN.saveConfig();
-		//
-		//    Serial.print("5. Save configuration: ");
-		//    Serial.println(error);
+			error = LoRaWAN.OFF(uart);
+			digitalWrite(RN_RESET, LOW);
+			delay(500);
+			digitalWrite(RN_RESET, HIGH);
+			error = LoRaWAN.ON(uart);
 
-		    //------------------------------------
-		    //Module configured
-		    //------------------------------------
+			Serial5.print("1. Switch on: ");
+			arduinoLoRaWAN::printAnswer(error);
 
-		//    error = LoRaWAN.getDeviceEUI();
-		//    printAnswer(error);
-		//    //Device EUI in LoRaWAN._devEUI
-		//    Serial.print("LoRaWAN._devEUI: ");
-		//    Serial.println(LoRaWAN._devEUI);
+			error = LoRaWAN.setDataRate(0);
+			arduinoLoRaWAN::printAnswer(error);
+			Serial5.print("LoRaWAN._dataRate: ");
+			Serial5.println(LoRaWAN._dataRate);
 
-		//    error = LoRaWAN.getDeviceAddr();
-		//    printAnswer(error);
-		//    //Device Addres in LoRaWAN._devAddr
-		//    Serial.print("LoRaWAN._devAddr: ");
-		//    Serial.println(LoRaWAN._devAddr);
+			error = LoRaWAN.setRetries(0);
+			arduinoLoRaWAN::printAnswer(error);
+			Serial5.print("LoRaWAN._retries: ");
+			Serial5.println(LoRaWAN._retries);
 
-		    error = LoRaWAN.setDataRate(5);
-		    arduinoLoRaWAN::printAnswer(error);
-		    //Serial2.print("LoRaWAN._dataRate: ");
-		    //Serial2.println(LoRaWAN._dataRate);
+			error = LoRaWAN.setADR("on");
+			arduinoLoRaWAN::printAnswer(error);
+			Serial5.print("LoRaWAN._adr: ");
+			Serial5.println(LoRaWAN._adr);
 
-		    error = LoRaWAN.setRetries(0);
-		    arduinoLoRaWAN::printAnswer(error);
-		    //Serial2.print("LoRaWAN._dataRate: ");
-		    //Serial2.println(LoRaWAN._dataRate);
-
-		    error = LoRaWAN.setADR("on");
-		    arduinoLoRaWAN::printAnswer(error);
-
-		//    error = configChDefault(LoRaWAN);
-		//    arduinoLoRaWAN::printAnswer(error);
-
-		//    error = LoRaWAN.sleep(60000);
-		//    printAnswer(error);
-
-		    Watchdog.disable();
 			_deviceState = DEVICE_STATE_JOIN;
 			break;
 		}
@@ -277,6 +239,7 @@ void loop() {
 		case DEVICE_STATE_JOIN:
 		{
 			Watchdog.disable();
+			Watchdog.enable(16000);
 			//////////////////////////////////////////////
 			// 6. Join network
 			//////////////////////////////////////////////
@@ -287,18 +250,28 @@ void loop() {
 			 if( error == 0 )
 			 {
 			   //2. Join network OK
+			   Serial5.println("Join network OK");
 
-				 Watchdog.enable(16000);
 			   _deviceState = DEVICE_STATE_SEND;
 			 }
 			 else
 			 {
 			   //2. Join network error
-				 delay(30000);
+				 Serial5.println("Join network error");
+				 if(appWatchdog++ >= 10)
+				 {
+					 Serial5.println("Auto reset appWatchdog");
+					 appWatchdog = 0;
+					 Watchdog.reset();
+					 Watchdog.enable(1000);
+					 delay(2000);
+				 }
+				 Watchdog.reset();
+				 delay(10000);
 				 _deviceState = DEVICE_STATE_JOIN;
 			 }
 
-			break;
+		break;
 		}
 
 		case DEVICE_STATE_SEND:
@@ -338,14 +311,19 @@ void loop() {
 			sprintf(datas,"%02X", datab[0] & 0xff);
 			strcat(data, datas);
 
+			//tx_ok trasmissione precedente
+			memcpy(&datab[0], &pre_tx_ok, 1);
+			sprintf(datas,"%02X", datab[0] & 0xff);
+			strcat(data, datas);
+
 			if (htuP)
 			{
 				float t1 = htu.readTemperature();
-				Serial.print("htu temp: ");
-				Serial.println(t1);
+				Serial5.print("htu temp: ");
+				Serial5.println(t1);
 				float h1 = htu.readHumidity();
-				Serial.print("htu hum: ");
-				Serial.println(h1);
+				Serial5.print("htu hum: ");
+				Serial5.println(h1);
 				memcpy(&datab[0], &t1, 4);
 				sprintf(datas,"%02X%02X%02X%02X", datab[0] & 0xff, datab[1] & 0xff, datab[2] & 0xff, datab[3] & 0xff);
 				strcat(data, datas);
@@ -369,12 +347,15 @@ void loop() {
 				sensors.requestTemperatures();
 				delay(800);
 				float _ds18b20Temp = sensors.getTempC(_ds.addr);
+				Serial5.print("ds18b20Temp: ");
+				Serial5.println(_ds18b20Temp);
 				memcpy(&datab[0], &_ds18b20Temp, 4);
 				sprintf(datas,"%02X%02X%02X%02X", datab[0] & 0xff, datab[1] & 0xff, datab[2] & 0xff, datab[3] & 0xff);
 				strcat(data, datas);
 			}
 			else
 			{
+				Serial5.println("ds18b20Temp error: 0");
 				float zero = 0;
 				memcpy(&datab[0], &zero, 4);
 				sprintf(datas,"%02X%02X%02X%02X", datab[0] & 0xff, datab[1] & 0xff, datab[2] & 0xff, datab[3] & 0xff);
@@ -385,14 +366,15 @@ void loop() {
 				OPT3001 result = opt3001.readResult();
 				if(result.error == NO_ERROR)
 				{
-					Serial.print("OPT3001: ");
-					Serial.println(result.lux);
+					Serial5.print("OPT3001: ");
+					Serial5.println(result.lux);
 					memcpy(&datab[0], &result.lux, 4);
 					sprintf(datas,"%02X%02X%02X%02X", datab[0] & 0xff, datab[1] & 0xff, datab[2] & 0xff, datab[3] & 0xff);
 					strcat(data, datas);
 				}
 				else
 				{
+					Serial5.println("OPT3001 error: 0");
 					float zero = 0;
 					memcpy(&datab[0], &zero, 4);
 					sprintf(datas,"%02X%02X%02X%02X", datab[0] & 0xff, datab[1] & 0xff, datab[2] & 0xff, datab[3] & 0xff);
@@ -401,6 +383,7 @@ void loop() {
 			}
 			else
 			{
+				Serial5.println("OPT3001 error: 1");
 				float zero = 0;
 				memcpy(&datab[0], &zero, 4);
 				sprintf(datas,"%02X%02X%02X%02X", datab[0] & 0xff, datab[1] & 0xff, datab[2] & 0xff, datab[3] & 0xff);
@@ -408,15 +391,15 @@ void loop() {
 			}
 			if (bme280P)
 			{
-				Serial.print("bme280 temp: ");
+				Serial5.print("bme280 temp: ");
 				float t2 = bme280.readTempC();
-				Serial.println(t2, 2);
-				Serial.print("bme280 hum: ");
+				Serial5.println(t2, 2);
+				Serial5.print("bme280 hum: ");
 				float h2 = bme280.readFloatHumidity();
-				Serial.println(h2, 2);
-				Serial.print("bme280 press: ");
+				Serial5.println(h2, 2);
+				Serial5.print("bme280 press: ");
 				float p = bme280.readFloatPressure();
-				Serial.println(bme280.readFloatPressure(), 2);
+				Serial5.println(bme280.readFloatPressure(), 2);
 				memcpy(&datab[0], &t2, 4);
 				sprintf(datas,"%02X%02X%02X%02X", datab[0] & 0xff, datab[1] & 0xff, datab[2] & 0xff, datab[3] & 0xff);
 				strcat(data, datas);
@@ -432,8 +415,19 @@ void loop() {
 			// 3. Send unconfirmed packet
 			//////////////////////////////////////////////
 
-			error = LoRaWAN.sendConfirmed(port, data);
-			arduinoLoRaWAN::printAnswer(error);
+			int tx_cont = 0;
+			do
+			{
+				Watchdog.reset();
+				if(tx_cont<0)
+					delay(5000);
+				Serial5.print("Send unconfirmed packet: ");
+				Serial5.println(tx_cont);
+				error = LoRaWAN.sendConfirmed(port, data);
+				arduinoLoRaWAN::printAnswer(error);
+			}while(error!=0 && tx_cont++<3);
+
+			_deviceState = DEVICE_STATE_SLEEP;
 
 			// Error messages:
 			/*
@@ -446,155 +440,134 @@ void loop() {
 			// Check status
 			if( error == 0 )
 			{
-			 //3. Send Confirmed packet OK
-//			 Serial.println("Send Confirmed packet OK");
-			 if (LoRaWAN._dataReceived == true)
-			 {
-			   //There's data on
-			   //port number: LoRaWAN._port
-			   //and Data in: LoRaWAN._data
-//			   Serial.println("Downlink data");
-//			   Serial.print("LoRaWAN._port: ");
-//			   Serial.println(LoRaWAN._port);
-//			   Serial.print("LoRaWAN._data: ");
-//			   Serial.println(LoRaWAN._data);
+				//3. Send Confirmed packet OK
+				Serial5.println("Send Confirmed packet OK");
+				err_tx=0;
+				pre_tx_ok = 1;
+				if (LoRaWAN._dataReceived == true)
+				{
+					//There's data on
+					//port number: LoRaWAN._port
+					//and Data in: LoRaWAN._data
+					Serial5.println("Downlink data");
+					Serial5.print("LoRaWAN._port: ");
+					Serial5.println(LoRaWAN._port);
+					Serial5.print("LoRaWAN._data: ");
+					Serial5.println(LoRaWAN._data);
 
-			   int number = (int)strtol(LoRaWAN._data, NULL, 16);
-			   // auto-reset
-			   if(number == 97)
-			   {
-				   //auto-reset
-				   Watchdog.enable(1000);
-				   delay(2000);
-			   }
-			 }
+					pre_tx_ok = 2;
+					int number = (int)strtol(LoRaWAN._data, NULL, 16);
+					Serial5.println(number);
+
+					// auto-reset
+					if(number == 97)
+					{
+					//auto-reset
+					Serial5.println("Auto-reset");
+					Watchdog.enable(1000);
+					delay(2000);
+					}
+				}
 			}
 			else if( error == 2 )
 			{
-			   _deviceState = DEVICE_STATE_INIT;
+				delay(10000);
+				_deviceState = DEVICE_STATE_INIT;
 			}
 			else if( error == 6 )
 			{
-			   _deviceState = DEVICE_STATE_JOIN;
+				delay(10000);
+				_deviceState = DEVICE_STATE_JOIN;
 			}
 			else
 			{
-			 //3. Send Confirmed packet error
-				if(errtx++ >= 5)
+				Serial5.println("Send Confirmed packet ERROR");
+				if(err_tx++ >= 5)
 				{
-					//auto-reset
+					Serial5.println("Auto-reset");
 					Watchdog.enable(1000);
 					delay(2000);
 				}
 			}
-			digitalWrite(LED, HIGH);
-			delay(300);
-			digitalWrite(LED, LOW);
+			break;
+		}
+		case DEVICE_STATE_SLEEP:
+		{
+			//////////////////////////////////////////////
+			// 7. Sleep
+			//////////////////////////////////////////////
 
-			error = LoRaWAN.sleep(500000);
-			arduinoLoRaWAN::printAnswer(error);
+			Serial5.println("SLEEP");
+			Serial5.print("sleep_cont: ");
+			Serial5.println(sleep_cont);
 
-			//rtc.setAlarmSeconds((rtc.getAlarmSeconds() + 30) % 60);
-			rtc.setAlarmMinutes((rtc.getAlarmMinutes() + 3) % 60);
-			rtc.enableAlarm(rtc.MATCH_MMSS);
-			rtc.attachInterrupt(alarmMatch);
+			if(sleep_cont == 0)
+			{
+				sleep_cont++;
 
-			digitalWrite(LED, LOW);
-			Watchdog.disable();
-			rtc.standbyMode();
-//			delay(120000);
-			Watchdog.enable(16000);
+				Serial5.println("LoRaWAN.sleep");
+				error = LoRaWAN.sleep(2000000);
+				arduinoLoRaWAN::printAnswer(error);
 
-			delay(500);
+			}else if( ( sleep_cont > 0 ) && ( sleep_cont < ( DUTY_CYCLE_TIME / SLEEP_TIME ) ) )
+			{
+				sleep_cont++;
 
-			error = LoRaWAN.wakeUP();
-			arduinoLoRaWAN::printAnswer(error);
+				char buf[20];
+				sprintf(buf, "%02d:%02d:%02d - %2d/%2d/%4d", rtc.getHours(), rtc.getMinutes(), rtc.getSeconds(), rtc.getDay(), rtc.getMonth(), rtc.getYear());
+				Serial5.println(buf);
 
-			int err_ch = 0;
-			do{
-				delay(500);
+				rtc.disableAlarm();
+				rtc.setAlarmSeconds((rtc.getSeconds() + SLEEP_TIME) % 60);
+				rtc.enableAlarm(rtc.MATCH_SS);
+				rtc.attachInterrupt(alarmMatch);
+
+				sprintf(buf, "%02d:%02d:%02d - %2d/%2d/%4d", rtc.getAlarmHours(), rtc.getAlarmMinutes(), rtc.getAlarmSeconds(), rtc.getAlarmDay(), rtc.getAlarmMonth(), rtc.getAlarmYear());
+				Serial5.println(buf);
+
+				Watchdog.disable();
+				Watchdog.enable(16000);
+				Serial5.println("standbyMode");
+				delay(100);
+				Serial5.end();
+
+				rtc.standbyMode();
+
+				Serial5.begin(9600);
+				Serial5.println("exit sleep");
+				sprintf(buf, "%02d:%02d:%02d - %2d/%2d/%4d", rtc.getHours(), rtc.getMinutes(), rtc.getSeconds(), rtc.getDay(), rtc.getMonth(), rtc.getYear());
+				Serial5.println(buf);
+
+				Watchdog.disable();
+				Watchdog.enable(16000);
+
+				_deviceState = DEVICE_STATE_SLEEP;
+
+			}else if( sleep_cont >= ( DUTY_CYCLE_TIME / SLEEP_TIME ) )
+			{
+				Serial5.println("WAKEUP radio");
+				sleep_cont = 0;
+				_deviceState = DEVICE_STATE_SEND;
+
+				error = LoRaWAN.wakeUP();
+				arduinoLoRaWAN::printAnswer(error);
+
 				error = LoRaWAN.check();
 				arduinoLoRaWAN::printAnswer(error);
-				if(err_ch++>=5)
+
+				error = LoRaWAN.check();
+				arduinoLoRaWAN::printAnswer(error);
+
+				error = LoRaWAN.check();
+				arduinoLoRaWAN::printAnswer(error);
+				if(error > 0)
 					_deviceState = DEVICE_STATE_INIT;
-			}while((error!=0) && (_deviceState!=DEVICE_STATE_INIT));
+			}
+
+			break;
 		}
 	}
 
-
-//	uint8_t datab[4];
-//	char datas[9];
-//	data[0]='\0';
-//	if (htuP)
-//	{
-//		float t1 = htu.readTemperature();
-//		Serial.print("htu temp: "); Serial.println(t1);
-//		float h1 = htu.readHumidity();
-//		Serial.print("htu hum: "); Serial.println(h1);
-//		memcpy(&datab[0], &t1, 4);
-//		sprintf(datas,"%X%X%X%X", datab[0], datab[1], datab[2], datab[3]);
-//		strcat(data, datas);
-//		memcpy(&datab[0], &h1, 4);
-//		sprintf(datas,"%X%X%X%X", datab[0], datab[1], datab[2], datab[3]);
-//		strcat(data, datas);
-////		Serial.print("hex: ");
-////		Serial.println(data);
-//	}
-//	if(ds18b20Temp(_ds) == 0)
-//	{
-//		Serial.print("DS18B20 temp: ");
-//		Serial.println(_ds18b20Temp);
-//		memcpy(&datab[0], &_ds18b20Temp, 4);
-//		sprintf(datas,"%X%X%X%X", datab[0], datab[1], datab[2], datab[3]);
-//		strcat(data, datas);
-////		//Serial.print("hex: ");
-////		//Serial.println(data);
-//	}
-//	if(opt3001P)
-//	{
-//		OPT3001 result = opt3001.readResult();
-//		if(result.error == NO_ERROR)
-//		{
-//			Serial.print("OPT3001: ");
-//			Serial.println(result.lux);
-//			memcpy(&datab[0], &result.lux, 4);
-//			sprintf(datas,"%X%X%X%X", datab[0], datab[1], datab[2], datab[3]);
-//			strcat(data, datas);
-////			//Serial.print("hex: ");
-////			//Serial.println(data);
-//		}
-//	}
-//	if (bme280P)
-//	{
-//		Serial.print("bme280 temp: ");
-//		float t2 = bme280.readTempC();
-//		Serial.println(t2, 2);
-//		Serial.print("bme280 hum: ");
-//		float h2 = bme280.readFloatHumidity();
-//		Serial.println(h2, 2);
-//		Serial.print("bme280 press: ");
-//		float p = bme280.readFloatPressure();
-//		Serial.println(bme280.readFloatPressure(), 2);
-//		memcpy(&datab[0], &t2, 4);
-//		sprintf(datas,"%X%X%X%X", datab[0], datab[1], datab[2], datab[3]);
-//		strcat(data, datas);
-//		memcpy(&datab[0], &h2, 4);
-//		sprintf(datas,"%X%X%X%X", datab[0], datab[1], datab[2], datab[3]);
-//		strcat(data, datas);
-//		memcpy(&datab[0], &p, 4);
-//		sprintf(datas,"%X%X%X%X", datab[0], datab[1], datab[2], datab[3]);
-//		strcat(data, datas);
-////		//Serial2.print("hex: ");
-////		//Serial2.println(data);
-//	}
-//
-//	error = LoRaWAN.check();
-//	arduinoLoRaWAN::printAnswer(error);
-//
-//  digitalWrite(LED, HIGH);   // turn the LED on (HIGH is the voltage level)
-//  delay(1000);              // wait for a second
-//  digitalWrite(LED, LOW);    // turn the LED off by making the voltage LOW
-//  delay(5000);              // wait for a second
 }
 
 // function to print a device address
@@ -602,7 +575,7 @@ void printAddress(DeviceAddress deviceAddress)
 {
   for (uint8_t i = 0; i < 8; i++)
   {
-    if (deviceAddress[i] < 16) Serial.print("0");
-    Serial.print(deviceAddress[i], HEX);
+    if (deviceAddress[i] < 16) Serial5.print("0");
+    Serial5.print(deviceAddress[i], HEX);
   }
 }

@@ -40,24 +40,24 @@ uint8_t configChDefault(arduinoLoRaWAN LoRaWAN)
 
 	error1 = LoRaWAN.saveConfig();
 	arduinoLoRaWAN::printAnswer(error1);
-	Serial.println("Save configuration");
+//	Serial5.println("Save configuration");
 
 	for (i=3;i<=7;i++)
 	{
 		error1 = 0;
 		error1 = LoRaWAN.getChannelDRRange(i);
 		arduinoLoRaWAN::printAnswer(error1);
-		Serial.println("LoRaWAN._drrMin: " + LoRaWAN._drrMin[i]);
-		Serial.println("LoRaWAN._drrMax: " + LoRaWAN._drrMax[i]);
+//		Serial5.println("LoRaWAN._drrMin: " + LoRaWAN._drrMin[i]);
+//		Serial5.println("LoRaWAN._drrMax: " + LoRaWAN._drrMax[i]);
 		error1 = LoRaWAN.getChannelFreq(i);
 		arduinoLoRaWAN::printAnswer(error1);
-		Serial.println("LoRaWAN._freq: " + LoRaWAN._freq[i]);
+//		Serial5.println("LoRaWAN._freq: " + LoRaWAN._freq[i]);
 		error1 = LoRaWAN.getChannelDutyCycle(i);
 		arduinoLoRaWAN::printAnswer(error1);
-		Serial.println("LoRaWAN._dCycle: " + LoRaWAN._dCycle[i]);
+//		Serial5.println("LoRaWAN._dCycle: " + LoRaWAN._dCycle[i]);
 		error1 = LoRaWAN.getChannelStatus(i);
 		arduinoLoRaWAN::printAnswer(error1);
-		Serial.println("LoRaWAN._status: " + LoRaWAN._status[i]);
+//		Serial5.println("LoRaWAN._status: " + LoRaWAN._status[i]);
 	}
 
 	return LORAWAN_ANSWER_OK;

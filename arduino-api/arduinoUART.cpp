@@ -208,13 +208,13 @@ uint8_t  arduinoUART::sendCommand( char* command,
   uint16_t i = 0;
 
   #if DEBUG_UART > 0
-    PRINT_UART(F("cmd:")); Serial.println(command);
+    PRINT_UART(F("cmd:")); Serial5.println(command);
   #endif
 
   #if DEBUG_UART > 1      
-    PRINT_UART(F("ans1:")); Serial.println(ans1);
-    if(ans2!=NULL) { PRINT_UART(F("ans2:")); Serial.println(ans2);}
-    if(ans3!=NULL) { PRINT_UART(F("ans3:")); Serial.println(ans3);}
+    PRINT_UART(F("ans1:")); Serial5.println(ans1);
+    if(ans2!=NULL) { PRINT_UART(F("ans2:")); Serial5.println(ans2);}
+    if(ans3!=NULL) { PRINT_UART(F("ans3:")); Serial5.println(ans3);}
     if(ans4!=NULL) { PRINT_UART(F("ans4:")); Serial.println(ans4);}
   #endif
 
@@ -255,7 +255,7 @@ uint8_t  arduinoUART::sendCommand( char* command,
     {   
       #if DEBUG_UART > 0
         PRINT_UART(F("found:"));  
-        Serial.println( ans1 );
+        Serial5.println( ans1 );
       #endif    
       return 1;
     }
@@ -267,7 +267,7 @@ uint8_t  arduinoUART::sendCommand( char* command,
       { 
         #if DEBUG_UART > 0
           PRINT_UART(F("found:"));  
-          Serial.println( ans2 );
+          Serial5.println( ans2 );
         #endif      
         return 2;
       }
@@ -280,7 +280,7 @@ uint8_t  arduinoUART::sendCommand( char* command,
       { 
         #if DEBUG_UART > 0
           PRINT_UART(F("found:"));    
-          Serial.println( ans3 );
+          Serial5.println( ans3 );
         #endif        
         return 3;
       }
@@ -293,7 +293,7 @@ uint8_t  arduinoUART::sendCommand( char* command,
       { 
         #if DEBUG_UART > 0
           PRINT_UART(F("found:"));
-          Serial.println( ans4 );
+          Serial5.println( ans4 );
         #endif      
         return 4;
       }
@@ -308,7 +308,7 @@ uint8_t  arduinoUART::sendCommand( char* command,
   #endif  
   #if DEBUG_UART > 1
     PRINT_UART(F("_buffer:"));
-    Serial.println( (char *)_buffer );
+    Serial5.println( (char *)_buffer );
   #endif  
   return 0; 
 }
@@ -483,7 +483,7 @@ uint8_t  arduinoUART::waitFor( char* ans1,
     {   
       #if DEBUG_UART > 0
         PRINT_UART(F("found:"));
-        Serial.println( ans1 );  
+        Serial5.println( ans1 );
       #endif    
       return 1;
     }
@@ -495,7 +495,7 @@ uint8_t  arduinoUART::waitFor( char* ans1,
       { 
         #if DEBUG_UART > 0
           PRINT_UART(F("found:"));  
-          Serial.println( ans2 );  
+          Serial5.println( ans2 );
         #endif    
         return 2;
       }
@@ -508,7 +508,7 @@ uint8_t  arduinoUART::waitFor( char* ans1,
       { 
         #if DEBUG_UART > 0
           PRINT_UART(F("found:"));
-          Serial.println( ans3 );  
+          Serial5.println( ans3 );
         #endif      
         return 3;
       }
@@ -521,7 +521,7 @@ uint8_t  arduinoUART::waitFor( char* ans1,
       { 
         #if DEBUG_UART > 0
           PRINT_UART(F("found:"));
-          Serial.println( ans4 );  
+          Serial5.println( ans4 );
         #endif      
         return 4;
       }
