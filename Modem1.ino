@@ -20,7 +20,7 @@
 
 RTCZero rtc;
 #define SLEEP_TIME 10
-#define DUTY_CYCLE_TIME 180
+#define DEFAULT_DUTY_CYCLE_TIME 180
 
 /* Change these values to set the current initial time */
 const uint8_t seconds = 0;
@@ -76,6 +76,8 @@ uint32_t sleep_cont = 0;
 uint32_t appWatchdog = 0;
 
 int err_tx = 0;
+
+uint8_t duty_cycle_time = DEFAULT_DUTY_CYCLE_TIME;
 
 void alarmMatch()
 {
@@ -419,7 +421,7 @@ void loop() {
 			do
 			{
 				Watchdog.reset();
-				if(tx_cont<0)
+				if(tx_cont>0)
 					delay(5000);
 				Serial5.print("Send unconfirmed packet: ");
 				Serial5.println(tx_cont);
@@ -456,27 +458,47 @@ void loop() {
 					Serial5.println(LoRaWAN._data);
 
 					pre_tx_ok = 2;
-					int number = (int)strtol(LoRaWAN._data, NULL, 16);
-					Serial5.println(number);
 
-					// auto-reset
-					if(number == 97)
+					if(LoRaWAN._port == 1)
 					{
-					//auto-reset
-					Serial5.println("Auto-reset");
-					Watchdog.enable(1000);
-					delay(2000);
+
+						int number = (int)strtol(LoRaWAN._data, NULL, 16);
+						Serial5.println(number);
+
+						// auto-reset
+						if(number == 97)
+						{
+						//auto-reset
+						Serial5.println("Auto-reset");
+						Watchdog.enable(1000);
+						delay(2000);
+						}
 					}
+					else if(LoRaWAN._port == 2)
+					{
+						long number = strtol(LoRaWAN._data, NULL, 16);
+						Serial5.println(number);
+
+						uint8_t command = (number >> 16) && 0xFF;
+						uint16_t dct_next = (number >> 8 && 0xFF) + (number >> 0 && 0xFF);
+
+						if(number == 100) // d
+						{
+						//auto-reset
+						Serial5.println("Auto-reset");
+						Watchdog.enable(1000);
+						delay(2000);
+						}
+					}
+
 				}
 			}
-			else if( error == 2 )
-			{
-				delay(10000);
-				_deviceState = DEVICE_STATE_INIT;
-			}
+//			else if( error == 2 )
+//			{
+//				_deviceState = DEVICE_STATE_INIT;
+//			}
 			else if( error == 6 )
 			{
-				delay(10000);
 				_deviceState = DEVICE_STATE_JOIN;
 			}
 			else
@@ -509,7 +531,7 @@ void loop() {
 				error = LoRaWAN.sleep(2000000);
 				arduinoLoRaWAN::printAnswer(error);
 
-			}else if( ( sleep_cont > 0 ) && ( sleep_cont < ( DUTY_CYCLE_TIME / SLEEP_TIME ) ) )
+			}else if( ( sleep_cont > 0 ) && ( sleep_cont < ( duty_cycle_time / SLEEP_TIME ) ) )
 			{
 				sleep_cont++;
 
@@ -543,7 +565,7 @@ void loop() {
 
 				_deviceState = DEVICE_STATE_SLEEP;
 
-			}else if( sleep_cont >= ( DUTY_CYCLE_TIME / SLEEP_TIME ) )
+			}else if( sleep_cont >= ( duty_cycle_time / SLEEP_TIME ) )
 			{
 				Serial5.println("WAKEUP radio");
 				sleep_cont = 0;
@@ -551,13 +573,13 @@ void loop() {
 
 				error = LoRaWAN.wakeUP();
 				arduinoLoRaWAN::printAnswer(error);
-
+				delay(100);
 				error = LoRaWAN.check();
 				arduinoLoRaWAN::printAnswer(error);
-
+				delay(100);
 				error = LoRaWAN.check();
 				arduinoLoRaWAN::printAnswer(error);
-
+				delay(100);
 				error = LoRaWAN.check();
 				arduinoLoRaWAN::printAnswer(error);
 				if(error > 0)
