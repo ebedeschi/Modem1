@@ -113,6 +113,10 @@ sloeber.ino.cpp.o: ..\sloeber.ino.cpp \
  C:\Program\ Files\sloeber\arduinoPlugin\libraries\ClosedCube_OPT3001\1.1.2\src/ClosedCube_OPT3001.h \
  C:\Program\ Files\sloeber\arduinoPlugin\libraries\OneWire\2.3.3/OneWire.h \
  C:\Program\ Files\sloeber\arduinoPlugin\libraries\DallasTemperature\3.7.9/DallasTemperature.h \
+ C:\Program\ Files\sloeber\arduinoPlugin\libraries\Adafruit_BMP280_Library\1.0.2/Adafruit_Sensor.h \
+ C:\Program\ Files\sloeber\arduinoPlugin\packages\adafruit\hardware\samd\1.0.22\cores\arduino/Print.h \
+ C:\Program\ Files\sloeber\arduinoPlugin\libraries\Adafruit_BMP280_Library\1.0.2/Adafruit_BMP280.h \
+ C:\Program\ Files\sloeber\arduinoPlugin\libraries\Adafruit_BMP280_Library\1.0.2/Adafruit_Sensor.h \
  C:\Users\Emanuele\Documents\sloeber-workspace\Modem1\arduinoLoRaWAN/arduinoLoRaWAN.h \
  C:\Users\Emanuele\Documents\sloeber-workspace\Modem1\arduinoLoRaWAN/configLoRaWAN.h \
  C:\Users\Emanuele\Documents\sloeber-workspace\Modem1\arduinoLoRaWAN/arduinoLoRaWAN.h \
@@ -345,6 +349,14 @@ C:\Program\ Files\sloeber\arduinoPlugin\libraries\ClosedCube_OPT3001\1.1.2\src/C
 C:\Program\ Files\sloeber\arduinoPlugin\libraries\OneWire\2.3.3/OneWire.h:
 
 C:\Program\ Files\sloeber\arduinoPlugin\libraries\DallasTemperature\3.7.9/DallasTemperature.h:
+
+C:\Program\ Files\sloeber\arduinoPlugin\libraries\Adafruit_BMP280_Library\1.0.2/Adafruit_Sensor.h:
+
+C:\Program\ Files\sloeber\arduinoPlugin\packages\adafruit\hardware\samd\1.0.22\cores\arduino/Print.h:
+
+C:\Program\ Files\sloeber\arduinoPlugin\libraries\Adafruit_BMP280_Library\1.0.2/Adafruit_BMP280.h:
+
+C:\Program\ Files\sloeber\arduinoPlugin\libraries\Adafruit_BMP280_Library\1.0.2/Adafruit_Sensor.h:
 
 C:\Users\Emanuele\Documents\sloeber-workspace\Modem1\arduinoLoRaWAN/arduinoLoRaWAN.h:
 

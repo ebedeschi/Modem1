@@ -13,6 +13,8 @@
 #define OPT3001_ADDRESS 0x44
 #include <OneWire.h>
 #include <DallasTemperature.h>
+#include "Adafruit_Sensor.h"
+#include <Adafruit_BMP280.h>
 
 // LoRaWAN library
 #include <arduinoLoRaWAN.h>
@@ -20,7 +22,9 @@
 
 RTCZero rtc;
 #define SLEEP_TIME 10
-#define DEFAULT_DUTY_CYCLE_TIME 180
+#define DEFAULT_DUTY_CYCLE_TIME 600
+
+uint32_t duty_cycle_time = 0;
 
 /* Change these values to set the current initial time */
 const uint8_t seconds = 0;
@@ -64,8 +68,9 @@ typedef struct ds
 	bool check;
   };
 ds _ds;
-BME280 bme280;
-bool bme280P = false;
+//BME280 bme280;
+Adafruit_BMP280 bmp; // I2C
+bool bmx280P = false;
 ClosedCube_OPT3001 opt3001;
 bool opt3001P = false;
 uint8_t pre_tx_ok = 0;
@@ -77,7 +82,7 @@ uint32_t appWatchdog = 0;
 
 int err_tx = 0;
 
-uint8_t duty_cycle_time = DEFAULT_DUTY_CYCLE_TIME;
+
 
 void alarmMatch()
 {
@@ -124,11 +129,16 @@ void setup() {
 	digitalWrite(LED, LOW);
 	Serial5.println("START");
 
+	duty_cycle_time = DEFAULT_DUTY_CYCLE_TIME;
+
+	Serial5.print("duty_cycle_time: ");
+	Serial5.println(duty_cycle_time);
 
 	// RTC initialization
 	rtc.begin();
 	rtc.setTime(hours, minutes, seconds);
 	rtc.setDate(day, month, year);
+	Serial5.println("RTC ok");
 
 	htuP = htu.begin();
 	Serial5.print("Sensor HTU21DF: ");
@@ -142,7 +152,7 @@ void setup() {
 	}
 
 	sensors.begin();
-	memcpy(&_ds.addr, 0x00, 8);
+	//memcpy(&_ds.addr, 0x00, 8);
 	_ds.t_16 = 0;
 	_ds.check = false;
 	if (oneWire.search(_ds.addr))
@@ -170,21 +180,32 @@ void setup() {
 	else
 		Serial5.println("opt3001P OFF");
 
-	bme280.settings.commInterface = I2C_MODE;
-	bme280.settings.I2CAddress = 0x77;
-	bme280.settings.runMode = 3;
-	bme280.settings.tStandby = 0;
-	bme280.settings.filter = 0;
-	bme280.settings.tempOverSample = 1;
-	bme280.settings.pressOverSample = 1;
-	bme280.settings.humidOverSample = 1;
-	if(bme280.begin() == 0x60)
+//	bme280.settings.commInterface = I2C_MODE;
+//	bme280.settings.I2CAddress = 0x77;
+//	bme280.settings.runMode = 3;
+//	bme280.settings.tStandby = 0;
+//	bme280.settings.filter = 0;
+//	bme280.settings.tempOverSample = 1;
+//	bme280.settings.pressOverSample = 1;
+//	bme280.settings.humidOverSample = 1;
+//	if(bme280.begin() == 0x60)
+//	{
+//		Serial5.println("bme280 ON");
+//		bme280P = true;
+//	}
+//	else
+//	{
+//		Serial5.println("bme280 OFF");
+//	}
+	if(bmp.begin())
 	{
-		Serial5.println("bme280 ON");
-		bme280P = true;
+		Serial5.println("bmp280 ON");
+		bmx280P = true;
 	}
 	else
-		Serial5.println("bme280 OFF");
+	{
+		Serial5.println("bmp280 OFF");
+	}
 
 	Serial5.println("Fine setup");
 
@@ -219,7 +240,7 @@ void loop() {
 			Serial5.print("1. Switch on: ");
 			arduinoLoRaWAN::printAnswer(error);
 
-			error = LoRaWAN.setDataRate(0);
+			error = LoRaWAN.setDataRate(5);
 			arduinoLoRaWAN::printAnswer(error);
 			Serial5.print("LoRaWAN._dataRate: ");
 			Serial5.println(LoRaWAN._dataRate);
@@ -282,12 +303,16 @@ void loop() {
 			char datas[9];
 			data[0]='\0';
 
-			int sensorValue = 0;
+			float sensorValue = 0;
 			digitalWrite(BAT_ADC_EN, HIGH);
 			delay(500);
 			sensorValue = analogRead(BAT_ADC);
+			for(int i=0;i<100;i++)
+				sensorValue += analogRead(BAT_ADC);
+			sensorValue/=100;
 			digitalWrite(BAT_ADC_EN, LOW);
-			float v = ((float)sensorValue)*(0.0013427734375);
+			//float v = ((float)sensorValue)*(0.0013427734375); // old partitore v1.0
+			float v = ((float)sensorValue)*(0.00208913308913);	// new partitore v2.1 0.0021099853515625
 			float a = ( ( (v-3) / 1.2) * 254 ) + 1;
 			uint8_t level = 0;
 			if(a<=0)
@@ -391,17 +416,26 @@ void loop() {
 				sprintf(datas,"%02X%02X%02X%02X", datab[0] & 0xff, datab[1] & 0xff, datab[2] & 0xff, datab[3] & 0xff);
 				strcat(data, datas);
 			}
-			if (bme280P)
+			if (bmx280P)
 			{
-				Serial5.print("bme280 temp: ");
-				float t2 = bme280.readTempC();
+//				Serial5.print("bme280 temp: ");
+//				float t2 = bme280.readTempC();
+//				Serial5.println(t2, 2);
+//				Serial5.print("bme280 hum: ");
+//				float h2 = bme280.readFloatHumidity();
+//				Serial5.println(h2, 2);
+//				Serial5.print("bme280 press: ");
+//				float p = bme280.readFloatPressure();
+//				Serial5.println(bme280.readFloatPressure(), 2);
+				Serial5.print("bmp280 temp: ");
+				float t2 = bmp.readTemperature();
 				Serial5.println(t2, 2);
-				Serial5.print("bme280 hum: ");
-				float h2 = bme280.readFloatHumidity();
+				Serial5.print("bmp280 hum: ");
+				float h2 = 0.0;
 				Serial5.println(h2, 2);
-				Serial5.print("bme280 press: ");
-				float p = bme280.readFloatPressure();
-				Serial5.println(bme280.readFloatPressure(), 2);
+				Serial5.print("bmp280 press: ");
+				float p = bmp.readPressure();
+				Serial5.println(p, 2);
 				memcpy(&datab[0], &t2, 4);
 				sprintf(datas,"%02X%02X%02X%02X", datab[0] & 0xff, datab[1] & 0xff, datab[2] & 0xff, datab[3] & 0xff);
 				strcat(data, datas);
@@ -520,6 +554,16 @@ void loop() {
 			//////////////////////////////////////////////
 
 			Serial5.println("SLEEP");
+
+			Serial5.print("duty_cycle_time: ");
+			Serial5.println(duty_cycle_time);
+
+
+			uint32_t d_s = ( duty_cycle_time / SLEEP_TIME );
+
+			Serial5.print("d_s: ");
+			Serial5.println((uint32_t)d_s);
+
 			Serial5.print("sleep_cont: ");
 			Serial5.println(sleep_cont);
 
@@ -531,7 +575,7 @@ void loop() {
 				error = LoRaWAN.sleep(2000000);
 				arduinoLoRaWAN::printAnswer(error);
 
-			}else if( ( sleep_cont > 0 ) && ( sleep_cont < ( duty_cycle_time / SLEEP_TIME ) ) )
+			}else if( ( sleep_cont > 0 ) && ( sleep_cont < (uint32_t)d_s ) )
 			{
 				sleep_cont++;
 
@@ -565,7 +609,7 @@ void loop() {
 
 				_deviceState = DEVICE_STATE_SLEEP;
 
-			}else if( sleep_cont >= ( duty_cycle_time / SLEEP_TIME ) )
+			}else if( sleep_cont >= (uint32_t)d_s )
 			{
 				Serial5.println("WAKEUP radio");
 				sleep_cont = 0;

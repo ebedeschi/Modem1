@@ -2,7 +2,7 @@
 //This is a automatic generated file
 //Please do not modify this file
 //If you touch this file your change will be overwritten during the next build
-//This file has been generated on 2018-12-01 10:56:37
+//This file has been generated on 2019-10-03 10:44:43
 
 #include "Arduino.h"
 #include "constant.h"
@@ -17,6 +17,8 @@
 #define OPT3001_ADDRESS 0x44
 #include <OneWire.h>
 #include <DallasTemperature.h>
+#include "Adafruit_Sensor.h"
+#include <Adafruit_BMP280.h>
 #include <arduinoLoRaWAN.h>
 #include <configLoRaWAN.h>
 

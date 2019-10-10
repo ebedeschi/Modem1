@@ -42,9 +42,19 @@
 			<locationURI>ECLIPSE_HOME/arduinoPlugin/packages/adafruit/hardware/samd/1.0.22/variants/feather_m0</locationURI>
 		</link>
 		<link>
+			<name>libraries/Adafruit_BMP280_Library</name>
+			<type>2</type>
+			<locationURI>ECLIPSE_HOME/arduinoPlugin/libraries/Adafruit_BMP280_Library/1.0.2</locationURI>
+		</link>
+		<link>
 			<name>libraries/Adafruit_HTU21DF_Library</name>
 			<type>2</type>
 			<locationURI>ECLIPSE_HOME/arduinoPlugin/libraries/Adafruit_HTU21DF_Library/1.0.1</locationURI>
+		</link>
+		<link>
+			<name>libraries/Adafruit_Sensor</name>
+			<type>2</type>
+			<locationURI>ECLIPSE_HOME/arduinoPlugin/libraries/Adafruit_Sensor/1.0.0</locationURI>
 		</link>
 		<link>
 			<name>libraries/Adafruit_SleepyDog_Library</name>
